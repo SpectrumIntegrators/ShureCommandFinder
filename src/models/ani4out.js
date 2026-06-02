@@ -21,19 +21,19 @@ const channelCommands = [
     cmd('audio_gain', range(1, 4)),
     cmd('audio_mute', range(1, 4)),
     cmd('audio_out_lvl', range(1, 4)),
-    cmd('audio_in_peak', range(1, 4)),
-    cmd('audio_in_rms', range(1, 4)),
-    cmd('limiter_engaged', range(1, 4)),
+    cmd('audio_in_peak', range(1, 4), { fw: '2.0' }),
+    cmd('audio_in_rms', range(1, 4), { fw: '2.0' }),
+    cmd('limiter_engaged', range(1, 4), { fw: '2.0' }),
     cmd('get_all', range(1, 4)),
 ];
 
 const deviceCommands = [
     dcmd('model'), dcmd('serial'), dcmd('fw_ver'), dcmd('device_id'), dcmd('na_device_name'),
     dcmd('preset'),
-    deviceEnumCmd('audio_summing_mode', 'Audio Summing Mode', 'Routing', 'AUDIO_SUMMING_MODE', ['OFF', '1+2', '3+4', '1+2/3+4', '1+2+3+4'], 'Summing'),
-    dcmd('flash'), dcmd('led_brightness'), dcmd('reboot'), dcmd('default_settings'),
-    dcmd('encryption'), dcmd('control_mac'), dcmd('ip_addr'),
-    dcmd('output_meter_mode'), dcmd('meter_rate'),
+    { ...deviceEnumCmd('audio_summing_mode', 'Audio Summing Mode', 'Routing', 'AUDIO_SUMMING_MODE', ['OFF', '1+2', '3+4', '1+2/3+4', '1+2+3+4'], 'Summing'), fw: '2.0' },
+    dcmd('flash'), dcmd('led_brightness'), dcmd('reboot', { fw: '2.0' }), dcmd('default_settings', { fw: '2.0' }),
+    dcmd('encryption', { fw: '2.0' }), dcmd('control_mac'), dcmd('ip_addr'),
+    dcmd('output_meter_mode', { fw: '2.0' }), dcmd('meter_rate'),
 ];
 
 export default makeModel({
@@ -42,7 +42,8 @@ export default makeModel({
         name: 'ANI4OUT',
         fullName: 'ANI4OUT (4-Channel Dante-to-Analog)',
         port: 2202,
-        fwTarget: 'current',
+        docVersion: null,
+        docDate: 'June 2017',
         gainOffsetDb: 110,
         hasMatrix: false,
         channelPad: 1,

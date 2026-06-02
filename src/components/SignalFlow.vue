@@ -12,9 +12,6 @@
                 @click="$emit('select', el.id)">
                 <span class="ch-num" title="API channel number">{{ pad2(el.channel) }}</span>
                 <span class="row-name">{{ el.name }}</span>
-                <span class="chips">
-                    <span v-for="chip in el.chain" :key="chip" class="chip" :class="chipClass(chip)">{{ chip }}</span>
-                </span>
             </button>
         </div>
 
@@ -30,9 +27,6 @@
                 @click="$emit('select', el.id)">
                 <span class="block-title">{{ el.short }}</span>
                 <span class="ch-num light">ch {{ pad2(el.channel) }}</span>
-                <span v-if="el.chain.length" class="chips center">
-                    <span v-for="chip in el.chain" :key="chip" class="chip dark">{{ chip }}</span>
-                </span>
             </button>
         </div>
 
@@ -55,9 +49,6 @@
                 class="row output-row"
                 :class="{ active: el.id === selectedId }"
                 @click="$emit('select', el.id)">
-                <span class="chips">
-                    <span v-for="chip in el.chain" :key="chip" class="chip" :class="chipClass(chip)">{{ chip }}</span>
-                </span>
                 <span class="row-name">{{ el.name }}</span>
                 <span v-if="el.uiNumber != null && el.uiNumber !== el.channel" class="ui-num" title="Shure Designer label">#{{ el.uiNumber }}</span>
                 <span class="ch-num" title="API channel number">{{ pad2(el.channel) }}</span>
@@ -97,10 +88,6 @@ export default {
         },
         isMic(el) {
             return el.chain.some((c) => ['AEC', 'NR', 'AGC'].includes(c));
-        },
-        chipClass(chip) {
-            if (['AEC', 'NR', 'AGC', 'Comp'].includes(chip)) return 'proc';
-            return 'eq';
         },
     },
 };
@@ -208,28 +195,6 @@ export default {
     background: rgba(255, 255, 255, 0.55);
     border-radius: 5px;
     padding: 1px 5px;
-}
-
-.chips {
-    display: inline-flex;
-    gap: 3px;
-    flex: 0 0 auto;
-
-    &.center {
-        justify-content: center;
-        margin-top: 4px;
-    }
-}
-
-.chip {
-    font-size: 0.62rem;
-    font-weight: 700;
-    border-radius: 3px;
-    padding: 1px 4px;
-
-    &.eq { background: c.$flow-eq; color: c.$text-dark; }
-    &.proc { background: c.$flow-aec; color: #fff; }
-    &.dark { background: rgba(255, 255, 255, 0.22); color: #fff; }
 }
 
 .block {

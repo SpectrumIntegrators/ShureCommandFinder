@@ -3,7 +3,7 @@
         <div class="cmd-head">
             <span class="cmd-name">{{ command.name }}</span>
             <span class="cmd-group">{{ command.group }}</span>
-            <span v-if="command.fw" class="cmd-fw" title="Requires this firmware or newer">fw {{ command.fw }}+</span>
+            <span v-if="fwReq" class="cmd-fw" title="Requires this firmware version or newer">fw {{ fwReq }}+</span>
         </div>
 
         <div v-if="hasControls" class="cmd-controls">
@@ -40,9 +40,15 @@ export default {
         outputChannel: { type: Number, default: null },
         value: { type: [String, Number], default: null },
         slotValue: { type: Number, default: null },
+        // Firmware requirement implied by the current selection (e.g. a channel that only
+        // exists on newer firmware). The command's own `fw` takes precedence when set.
+        contextFw: { type: String, default: null },
     },
     emits: ['update:value', 'update:slot'],
     computed: {
+        fwReq() {
+            return this.command.fw || this.contextFw;
+        },
         hasControls() {
             const p = this.command.param || { kind: 'none' };
             return p.kind !== 'none' || !!this.command.slot;

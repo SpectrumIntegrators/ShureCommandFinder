@@ -2,7 +2,8 @@
     <div class="cmd-line">
         <span class="verb" :class="'verb-' + line.verb">{{ line.label }}</span>
         <span v-if="showFn" class="fn-name">{{ fnName }}</span>
-        <code class="cmd-text">{{ line.text }}</code>
+        <span v-if="showFn && fw" class="fw-badge" title="Requires this firmware version or newer">fw {{ fw }}+</span>
+        <code class="cmd-text"><template v-for="(seg, i) in segments" :key="i"><span v-if="seg.ph" class="ph">{{ seg.v }}</span><template v-else>{{ seg.v }}</template></template></code>
         <button
             type="button"
             class="copy-btn"
@@ -15,6 +16,8 @@
 </template>
 
 <script>
+import { toSegments } from '@/utils/renderCommand.js';
+
 export default {
     name: 'CommandLine',
     props: {
@@ -22,9 +25,18 @@ export default {
         // In the by-verb layout we show which function the line belongs to.
         showFn: { type: Boolean, default: false },
         fnName: { type: String, default: '' },
+        // Firmware requirement shown next to the function name in the by-verb layout.
+        fw: { type: String, default: '' },
     },
     data() {
         return { copied: false };
+    },
+    computed: {
+        // Literal vs. placeholder segments for styled rendering. The copy button still
+        // copies the raw line.text, so what lands on the clipboard is unchanged.
+        segments() {
+            return toSegments(this.line.text);
+        },
     },
     methods: {
         async copy() {
@@ -83,6 +95,17 @@ export default {
     text-overflow: ellipsis;
 }
 
+.fw-badge {
+    flex: 0 0 auto;
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: #8a5a00;
+    background: #fdf3df;
+    border-radius: 10px;
+    padding: 1px 7px;
+    white-space: nowrap;
+}
+
 .cmd-text {
     flex: 1 1 auto;
     font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
@@ -93,6 +116,15 @@ export default {
     padding: 3px 8px;
     white-space: pre-wrap;
     word-break: break-word;
+
+    // Placeholders (values you substitute): italic, hugged by a thin, tight border.
+    .ph {
+        font-style: italic;
+        border: 1px solid rgba(231, 235, 243, 0.45);
+        border-radius: 3px;
+        padding: 0 2px;
+        margin: 0 1px;
+    }
 }
 
 .copy-btn {

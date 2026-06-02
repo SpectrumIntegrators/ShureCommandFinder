@@ -20,7 +20,7 @@
                 </select>
             </label>
 
-            <span class="app-sub">fw {{ model.meta.fwTarget }} &middot; TCP {{ model.meta.port }}</span>
+            <span class="app-sub" :title="cmdRefTitle">{{ cmdRefLabel }} &middot; TCP {{ model.meta.port }}</span>
         </nav>
         <main>
             <HomeView :model="model" />
@@ -60,6 +60,20 @@ export default {
     computed: {
         model() {
             return getModel(this.currentModelId);
+        },
+        // The command lists in this tool are transcribed from Shure's per-model
+        // "command strings" reference PDFs. docDate is when that reference was published
+        // (from the Shure date code), so it doubles as "command list last updated".
+        cmdRefLabel() {
+            const d = this.model.meta.docDate;
+            return d ? `Command list updated ${d}` : 'Command list reference';
+        },
+        cmdRefTitle() {
+            const m = this.model.meta;
+            const parts = [`Commands transcribed from the ${m.fullName || m.name} command-strings reference.`];
+            if (m.docVersion) parts.push(`Document/firmware version ${m.docVersion}.`);
+            if (m.docDate) parts.push(`Published ${m.docDate}.`);
+            return parts.join(' ');
         },
     },
     watch: {

@@ -23,6 +23,48 @@ export function renderTemplate(tpl, tokens) {
     return s;
 }
 
+// Splits a rendered command string into literal vs. placeholder segments so the UI can
+// style the placeholders (the parts you replace with a real value) differently.
+// Two flavours of placeholder are recognised:
+//   1. The text INSIDE curly braces. The braces themselves are literal — Shure wraps
+//      string/value fields (names, IDs, IP addresses, …) in real { } in its responses,
+//      so { } are part of the reply, not a "this is a variable" marker.
+//   2. Bare repeated-letter tokens such as nn, aaa, yy — Shure's value placeholders.
+//      (Repeated single letter only, so command keywords / note words stay literal.)
+export function toSegments(text) {
+    const segs = [];
+    const pushLiteral = (str) => {
+        if (str) segs.push({ ph: false, v: str });
+    };
+    // Within a non-brace span, pull out bare repeated-letter placeholder tokens.
+    const pushSpan = (str) => {
+        const re = /[a-z]+/g;
+        let last = 0;
+        let m;
+        while ((m = re.exec(str))) {
+            const tok = m[0];
+            const isPlaceholder = tok.length >= 2 && [...tok].every((c) => c === tok[0]);
+            if (!isPlaceholder) continue;
+            pushLiteral(str.slice(last, m.index));
+            segs.push({ ph: true, v: tok });
+            last = m.index + tok.length;
+        }
+        pushLiteral(str.slice(last));
+    };
+    const braceRe = /\{([^}]*)\}/g;
+    let i = 0;
+    let b;
+    while ((b = braceRe.exec(text))) {
+        pushSpan(text.slice(i, b.index));
+        pushLiteral('{');
+        if (b[1]) segs.push({ ph: true, v: b[1] });
+        pushLiteral('}');
+        i = b.index + b[0].length;
+    }
+    pushSpan(text.slice(i));
+    return segs;
+}
+
 const VERB_LABEL = { get: 'GET', set: 'SET', rep: 'REP', extra: '+' };
 
 /** Returns [{ verb, label, text }] for a single command given the current context. */

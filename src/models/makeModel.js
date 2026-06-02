@@ -3,7 +3,9 @@ import { buildEncoders } from '@/models/encoders.js';
 
 /**
  * @param {object} spec
- *   meta: { id, name, fullName, port, fwTarget, gainOffsetDb, hasMatrix, blurb }
+ *   meta: { id, name, fullName, port, docVersion, docDate, gainOffsetDb, hasMatrix, blurb }
+ *     docVersion: Shure command-strings reference / firmware version the list reflects (or null)
+ *     docDate:    human-readable publish date of that reference, e.g. 'April 2024' (or null)
  *   elements: []        selectable nodes (inputs/processing/outputs)
  *   channelCommands: [] composed via cmd()
  *   crosspointCommands: [] composed via xcmd()  (optional)

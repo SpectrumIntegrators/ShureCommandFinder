@@ -274,7 +274,7 @@ export const LIB = {
     get_all: {
         name: 'Get All Parameters',
         group: 'Utility',
-        templates: { get: '< GET {xx} ALL >', rep: ['< REP ... >  (one report per parameter)'] },
+        templates: { get: '< GET {xx} ALL >' },
         param: NONE,
         notes: 'Requests the status of every parameter on this channel.',
     },

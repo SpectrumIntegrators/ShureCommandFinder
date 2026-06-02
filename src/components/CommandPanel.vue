@@ -48,6 +48,7 @@
                         :model="model"
                         :channel="channel"
                         :output-channel="outputChannel"
+                        :context-fw="contextFw"
                         :value="values[cmd.id]"
                         :slot-value="slots[cmd.id]"
                         @update:value="setValue(cmd.id, $event)"
@@ -64,7 +65,7 @@
                         :key="i"
                         class="verb-row"
                         :class="{ 'has-ctl': sec.verb === 'set' && hasControl(row.cmd) }">
-                        <CommandLine :line="row.line" :show-fn="true" :fn-name="row.cmd.name" />
+                        <CommandLine :line="row.line" :show-fn="true" :fn-name="row.cmd.name" :fw="row.cmd.fw || contextFw" />
                         <ParamControl
                             v-if="sec.verb === 'set' && hasControl(row.cmd)"
                             class="verb-ctl"
@@ -83,6 +84,18 @@
                 <span class="material-icons">info</span>
                 REP strings are sent both as the reply to a GET/SET <em>and</em> unsolicited
                 whenever the parameter changes on the device.
+            </p>
+
+            <p class="rep-note">
+                <span class="material-icons">info</span>
+                <span>
+                    Italic, boxed tokens like <span class="ph">name</span> or
+                    <span class="ph">nn</span> are placeholders — substitute the real value.
+                    The curly brackets around text fields such as names, IDs and IP addresses
+                    (e.g. <span class="lit">{</span><span class="ph">name</span><span class="lit">}</span>)
+                    are <em>part of the device's reply</em> — it sends the literal
+                    <span class="lit">{ }</span> characters — not a marker that the value is a variable.
+                </span>
             </p>
         </div>
     </section>
@@ -123,6 +136,16 @@ export default {
         },
         outputChannel() {
             return this.isCrosspoint ? this.selection.output.channel : null;
+        },
+        // Firmware floor implied by the selected node itself: some channels/outputs only
+        // exist on newer firmware (e.g. P300 Dante outputs 3-8 need 4.1.x+), so every
+        // command on them inherits that requirement unless it declares a higher one.
+        contextFw() {
+            if (!this.selection) return null;
+            if (this.isCrosspoint) {
+                return this.selection.output.fw || this.selection.input.fw || null;
+            }
+            return this.selection.element.fw || null;
         },
         selKey() {
             if (!this.selection) return 'none';
@@ -425,6 +448,19 @@ export default {
     .material-icons {
         font-size: 18px;
         color: c.$accent;
+    }
+
+    .ph {
+        font-style: italic;
+        border: 1px solid rgba(91, 97, 112, 0.5);
+        border-radius: 3px;
+        padding: 0 3px;
+        margin: 0 1px;
+    }
+
+    .lit {
+        font-family: ui-monospace, Consolas, monospace;
+        font-weight: 700;
     }
 }
 </style>
