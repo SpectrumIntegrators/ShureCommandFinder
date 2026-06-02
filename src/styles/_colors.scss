@@ -1,0 +1,31 @@
+// Theme Colors
+$primary: #000;
+$accent: #1f6fb2;
+$secondary: #b3b8ab;
+$error: #c03221;
+$success: #157f1f;
+
+// Functional Colors
+$background: #f7f7fc;
+$surface: #fff;
+$border: #c9cdd6;
+$border-strong: #767676;
+$text-dark: #222230;
+$text-muted: #5b6170;
+$text-light: #fff;
+
+// P300 schematic element colors (mirroring Shure Designer's signal-flow view)
+$flow-input: #3b4fc4; // blue input blocks
+$flow-input-mic: #4258d0; // Dante mic inputs
+$flow-eq: #d8d8de; // PEQ / EQ blocks (grey)
+$flow-aec: #6d4f9e; // AEC / NR / AGC processing blocks (purple)
+$flow-automix: #1f7bb6; // automixer (blue)
+$flow-matrix: #2e8b57; // matrix mixer (green)
+$flow-output: #f2b417; // output blocks (gold/amber)
+
+// Command string accents (GET / SET / REP)
+$cmd-get: #157f1f;
+$cmd-set: #1f6fb2;
+$cmd-rep: #8a5a00;
+$code-bg: #1e2230;
+$code-text: #e7ebf3;
