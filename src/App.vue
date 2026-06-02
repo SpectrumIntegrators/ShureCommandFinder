@@ -26,7 +26,12 @@
             <HomeView :model="model" />
         </main>
         <footer>
-            Copyright &copy; 2026 Spectrum Integrators. Reference tool only &mdash;
+            <a
+                class="license-link"
+                :href="licenseUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="View the MIT License">Copyright &copy; 2026 Spectrum Integrators</a>. Reference tool only &mdash;
             not affiliated with, endorsed by, or sponsored by Shure Incorporated.
         </footer>
     </div>
@@ -35,7 +40,7 @@
 <script>
 import HomeView from '@/views/HomeView.vue';
 import logoUrl from '@/assets/logo.svg';
-import { ORG_URL } from '@/config.js';
+import { ORG_URL, LICENSE_URL } from '@/config.js';
 import { MODELS, getModel, DEFAULT_MODEL_ID } from '@/models/index.js';
 
 const LS_MODEL = 'p300finder.model';
@@ -53,6 +58,7 @@ export default {
         return {
             logoUrl,
             orgUrl: ORG_URL,
+            licenseUrl: LICENSE_URL,
             models: MODELS,
             currentModelId: getModel(saved).meta.id || DEFAULT_MODEL_ID,
         };
@@ -184,5 +190,14 @@ footer {
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+
+    .license-link {
+        color: inherit;
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
+        }
+    }
 }
 </style>
