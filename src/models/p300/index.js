@@ -8,6 +8,7 @@ export default makeModel({
         name: 'P300',
         fullName: 'IntelliMix P300',
         port: 2202,
+        productUrl: 'https://www.shure.com/en-US/products/mixers/p300',
         docVersion: '4.4',
         docDate: 'April 2024',
         gainOffsetDb: 110,

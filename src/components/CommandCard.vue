@@ -60,6 +60,7 @@ export default {
                 value: this.value,
                 slotValue: this.slotValue,
                 padWidth: this.model.meta.channelPad,
+                encoders: this.model.encoders,
             });
         },
     },

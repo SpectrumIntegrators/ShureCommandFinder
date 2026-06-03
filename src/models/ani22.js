@@ -19,6 +19,10 @@ const channelCommands = [
     cmd('chan_led_in_state', oneOf(1, 2)),
     cmd('audio_out_clip', range(1, 4)),
     cmd('get_all', range(1, 4)),
+
+    // ---- Beyond Basic (tab category set centrally in CATEGORY) ----
+    cmd('chan_name', range(1, 4)),
+    cmd('peq', range(1, 4)),
 ];
 
 const deviceCommands = [
@@ -28,8 +32,9 @@ const deviceCommands = [
     deviceEnableCmd('hw_gating_logic', 'Hardware Gating Logic', 'Logic', 'HW_GATING_LOGIC'),
     deviceRoCmd('limiter_engaged', 'Limiter Engaged', 'Status', 'LIMITER_ENGAGED', ['ON', 'OFF']),
     dcmd('encryption_ch'),
-    dcmd('flash'), dcmd('led_brightness'), dcmd('reboot'),
+    dcmd('flash'), dcmd('led_brightness_basic'), dcmd('reboot'),
     dcmd('ip_addr'), dcmd('input_meter_mode'), dcmd('meter_rate'),
+    dcmd('preset_names'),
 ];
 
 export default makeModel({
@@ -38,6 +43,7 @@ export default makeModel({
         name: 'ANI22',
         fullName: 'ANI22 (Audio Network Interface 2×2)',
         port: 2202,
+        productUrl: 'https://www.shure.com/en-US/products/mixers/ani22',
         docVersion: '2.2',
         docDate: 'December 2024',
         gainOffsetDb: 110,

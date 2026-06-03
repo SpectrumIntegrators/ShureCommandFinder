@@ -10,7 +10,7 @@
             <p class="sel-sub">{{ headerSub }}</p>
         </header>
 
-        <div class="panel-tools">
+        <div v-if="hasCommands" class="panel-tools">
             <span class="material-icons search-icon">search</span>
             <input
                 class="cmd-search"
@@ -31,14 +31,26 @@
                     By verb
                 </button>
             </div>
-            <span class="count">{{ filteredCount }}</span>
+            <div
+                class="layout-toggle level-toggle"
+                title="Command categories for this selection. Basic = frequent control · Tuning = DSP setup · Details = names/metering/status · plus any feature tabs · Other = misc · All = everything. Number = commands in each.">
+                <button
+                    v-for="t in tabs"
+                    :key="t.cat"
+                    type="button"
+                    :class="{ active: activeTab === t.cat }"
+                    @click="setLevel(t.cat)">
+                    {{ t.label }} <span class="lvl-n">{{ t.count }}</span>
+                </button>
+            </div>
         </div>
 
         <div class="panel-body">
-            <p v-if="!filteredCount" class="empty">No commands match.</p>
+            <p v-if="!hasCommands" class="empty">No control commands for this selection.</p>
+            <p v-else-if="!filteredCount" class="empty">No commands match.</p>
 
             <!-- By function: one card per command, listing its GET/SET/REP -->
-            <template v-if="layout === 'function'">
+            <template v-if="hasCommands && layout === 'function'">
                 <div v-for="grp in groups" :key="grp.name" class="block">
                     <h3 class="grp-title">{{ grp.name }}</h3>
                     <CommandCard
@@ -57,7 +69,7 @@
             </template>
 
             <!-- By verb: all GETs together, then SETs, then REPs -->
-            <template v-else>
+            <template v-else-if="hasCommands">
                 <div v-for="sec in verbSections" :key="sec.verb" class="block">
                     <h3 class="grp-title">{{ sec.title }}</h3>
                     <div
@@ -80,19 +92,33 @@
                 </div>
             </template>
 
-            <p class="rep-note">
+            <p v-if="hasCommands" class="rep-note">
                 <span class="material-icons">info</span>
                 REP strings are sent both as the reply to a GET/SET <em>and</em> unsolicited
                 whenever the parameter changes on the device.
             </p>
 
-            <p class="rep-note">
+            <p v-if="hasCommands" class="rep-note">
                 <span class="material-icons">info</span>
                 <span>
-                    Italic, boxed tokens like <span class="ph">name</span> or
-                    <span class="ph">nn</span> are placeholders — substitute the real value.
+                    Italic, boxed tokens are placeholders — in a GET/SET, substitute the real
+                    value. In a REP they show the <em>shape</em> of the device's reply, not a
+                    value to send. For <strong>fixed-width</strong> fields the placeholder is a
+                    run of letters as long as the field — <span class="ph">nnnn</span> for
+                    numbers, <span class="ph">xxxx</span> for text, distinct letters
+                    (<span class="ph">aaaa</span> <span class="ph">bbbb</span>) for separate
+                    fields — so a copied REP can be lined up and counted column-by-column. For
+                    values that vary in length (an enumerated keyword like a polar pattern), the
+                    placeholder is the <em>field name</em> (e.g. <span class="ph">pattern</span>)
+                    instead, since there's no fixed width to count.
+                </span>
+            </p>
+
+            <p v-if="hasCommands" class="rep-note">
+                <span class="material-icons">info</span>
+                <span>
                     The curly brackets around text fields such as names, IDs and IP addresses
-                    (e.g. <span class="lit">{</span><span class="ph">name</span><span class="lit">}</span>)
+                    (e.g. <span class="lit">{</span><span class="ph">xxxx</span><span class="lit">}</span>)
                     are <em>part of the device's reply</em> — it sends the literal
                     <span class="lit">{ }</span> characters — not a marker that the value is a variable.
                 </span>
@@ -108,6 +134,17 @@ import ParamControl from '@/components/ParamControl.vue';
 import { linesFor, defaultValue, VERB_ORDER } from '@/utils/renderCommand.js';
 
 const LS_LAYOUT = 'p300finder.layout';
+const LS_LEVEL = 'p300finder.cmdLevel';
+
+// Tabs are built dynamically per selection. Each command carries a `cat`; a category tab
+// appears only when the selection has commands in it (plus an "All" tab when more than one
+// category is present). Anything without a known category falls into "Other".
+const CAT_ORDER = ['basic', 'tuning', 'details', 'beamforming', 'coverage', 'other'];
+const CAT_LABELS = {
+    basic: 'Basic', tuning: 'Tuning', details: 'Details',
+    beamforming: 'Beamforming', coverage: 'Coverage', other: 'Other', all: 'All',
+};
+const catOf = (c) => (CAT_ORDER.includes(c.cat) ? c.cat : 'other');
 
 export default {
     name: 'CommandPanel',
@@ -124,7 +161,14 @@ export default {
         } catch {
             /* ignore */
         }
-        return { search: '', layout, values: {}, slots: {} };
+        let cmdLevel = 'basic';
+        try {
+            const s = localStorage.getItem(LS_LEVEL);
+            if (s in CAT_LABELS) cmdLevel = s;
+        } catch {
+            /* ignore */
+        }
+        return { search: '', layout, cmdLevel, values: {}, slots: {} };
     },
     computed: {
         isCrosspoint() {
@@ -162,13 +206,50 @@ export default {
             if (el.channel == null) return this.model.deviceCommands;
             return this.model.commandsForChannel(el.channel);
         },
-        filtered() {
+        // Commands matching the text search (level not yet applied).
+        searched() {
             const q = this.search.trim().toLowerCase();
             if (!q) return this.baseCommands;
             return this.baseCommands.filter((c) => {
                 const hay = `${c.name} ${c.group} ${c.id} ${JSON.stringify(c.templates)}`.toLowerCase();
                 return hay.includes(q);
             });
+        },
+        // Does this selection have any commands at all (before search)?
+        hasCommands() {
+            return this.baseCommands.length > 0;
+        },
+        // How many commands fall in each category for the current selection (after search).
+        catCounts() {
+            const counts = {};
+            for (const c of this.searched) {
+                const cat = catOf(c);
+                counts[cat] = (counts[cat] || 0) + 1;
+            }
+            return counts;
+        },
+        // The tabs to render: every category the selection HAS (search-independent, so the
+        // buttons stay put while filtering), plus an "All" tab when more than one is present.
+        // Button numbers reflect the active search.
+        tabs() {
+            const present = new Set(this.baseCommands.map(catOf));
+            const cats = CAT_ORDER.filter((cat) => present.has(cat));
+            const list = cats.map((cat) => ({ cat, label: CAT_LABELS[cat], count: this.catCounts[cat] || 0 }));
+            if (cats.length > 1) list.push({ cat: 'all', label: 'All', count: this.searched.length });
+            return list;
+        },
+        // The currently-shown tab, falling back gracefully when the saved tab isn't
+        // available for this selection (e.g. switching from an MXA920 to an ANI device).
+        activeTab() {
+            const cats = this.tabs.map((t) => t.cat);
+            if (cats.includes(this.cmdLevel)) return this.cmdLevel;
+            if (cats.includes('basic')) return 'basic';
+            return cats[0] || 'all';
+        },
+        // All shows everything; any other tab shows only its own category.
+        filtered() {
+            if (this.activeTab === 'all') return this.searched;
+            return this.searched.filter((c) => catOf(c) === this.activeTab);
         },
         filteredCount() {
             return this.filtered.length;
@@ -191,6 +272,7 @@ export default {
                     value: this.values[cmd.id],
                     slotValue: this.slots[cmd.id],
                     padWidth,
+                    encoders: this.model.encoders,
                 }),
             }));
             return VERB_ORDER.map((sec) => ({
@@ -268,6 +350,14 @@ export default {
             this.layout = l;
             try {
                 localStorage.setItem(LS_LAYOUT, l);
+            } catch {
+                /* ignore */
+            }
+        },
+        setLevel(l) {
+            this.cmdLevel = l;
+            try {
+                localStorage.setItem(LS_LEVEL, l);
             } catch {
                 /* ignore */
             }
@@ -354,16 +444,10 @@ export default {
         }
     }
 
-    .count {
-        flex: 0 0 auto;
-        font-size: 0.78rem;
-        color: c.$text-muted;
-        min-width: 1.5rem;
-        text-align: right;
-    }
 }
 
-.layout-toggle {
+.layout-toggle,
+.level-toggle {
     flex: 0 0 auto;
     display: inline-flex;
     border: 1px solid c.$border;
@@ -389,6 +473,12 @@ export default {
             color: #fff;
         }
     }
+}
+
+.level-toggle .lvl-n {
+    font-weight: 700;
+    opacity: 0.65;
+    margin-left: 0.15rem;
 }
 
 .panel-body {

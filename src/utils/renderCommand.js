@@ -29,22 +29,25 @@ export function renderTemplate(tpl, tokens) {
 //   1. The text INSIDE curly braces. The braces themselves are literal — Shure wraps
 //      string/value fields (names, IDs, IP addresses, …) in real { } in its responses,
 //      so { } are part of the reply, not a "this is a variable" marker.
-//   2. Bare repeated-letter tokens such as nn, aaa, yy — Shure's value placeholders.
-//      (Repeated single letter only, so command keywords / note words stay literal.)
+//   2. All-lowercase letter tokens (nn, yy, position, status, lobe, …). Shure writes value
+//      placeholders in lowercase; command keywords are UPPERCASE and real enum values are
+//      UPPERCASE or Mixed-case (ON, Muted), so they stay literal. The lowercase command
+//      words inc/dec are the exception and are kept literal.
+const PLACEHOLDER_DENYLIST = new Set(['inc', 'dec']);
 export function toSegments(text) {
     const segs = [];
     const pushLiteral = (str) => {
         if (str) segs.push({ ph: false, v: str });
     };
-    // Within a non-brace span, pull out bare repeated-letter placeholder tokens.
+    // Within a non-brace span, mark lowercase letter-runs (value placeholders) and leave
+    // uppercase keywords / mixed-case values as literal text.
     const pushSpan = (str) => {
-        const re = /[a-z]+/g;
+        const re = /[A-Za-z]+/g;
         let last = 0;
         let m;
         while ((m = re.exec(str))) {
             const tok = m[0];
-            const isPlaceholder = tok.length >= 2 && [...tok].every((c) => c === tok[0]);
-            if (!isPlaceholder) continue;
+            if (!/^[a-z]+$/.test(tok) || PLACEHOLDER_DENYLIST.has(tok)) continue;
             pushLiteral(str.slice(last, m.index));
             segs.push({ ph: true, v: tok });
             last = m.index + tok.length;
@@ -67,14 +70,42 @@ export function toSegments(text) {
 
 const VERB_LABEL = { get: 'GET', set: 'SET', rep: 'REP', extra: '+' };
 
+// A REP must never echo the value you typed into a SET. So the {v} in a REP renders as a
+// placeholder, never the live value:
+//   - Fixed-width fields → a run of n's (numbers) the exact width the device pads to, so a
+//     copied REP can be counted column-by-column.
+//   - Variable / enumerated values (e.g. a polar pattern of TOROID … BIDIRECTION) aren't a
+//     fixed width, so there's nothing to count — they show the field NAME instead.
+// Multi-value reps and fixed enum response sets are spelled out in the template itself
+// (aaa bbb…, or one REP line per option).
+function repPlaceholder(command, encoders) {
+    const p = command.param || {};
+    if (p.kind === 'value') {
+        const enc = encoders && encoders[p.encoding];
+        return enc && enc.digits ? 'n'.repeat(enc.digits) : 'nn';
+    }
+    if (p.kind === 'select') {
+        const opts = p.options || [];
+        // Numeric, fixed-width options (preset 01-10, brightness 0-5) → sized n's.
+        if (opts.length && opts.every((o) => /^\d+$/.test(o.value))) {
+            return 'n'.repeat(Math.max(...opts.map((o) => String(o.value).length)));
+        }
+        // Keyword options are variable width → name the field.
+        return (p.label || 'value').toLowerCase();
+    }
+    return 'nn';
+}
+
 /** Returns [{ verb, label, text }] for a single command given the current context. */
 export function linesFor(command, ctx) {
     const tokens = buildTokens(command, ctx);
+    // REP lines get an illustrative placeholder for {v}; SET/extras keep the live value.
+    const repTokens = { ...tokens, '{v}': repPlaceholder(command, ctx.encoders) };
     const t = command.templates;
     const out = [];
     if (t.get) out.push({ verb: 'get', label: VERB_LABEL.get, text: renderTemplate(t.get, tokens) });
     if (t.set) out.push({ verb: 'set', label: VERB_LABEL.set, text: renderTemplate(t.set, tokens) });
-    (t.rep || []).forEach((r) => out.push({ verb: 'rep', label: VERB_LABEL.rep, text: renderTemplate(r, tokens) }));
+    (t.rep || []).forEach((r) => out.push({ verb: 'rep', label: VERB_LABEL.rep, text: renderTemplate(r, repTokens) }));
     (t.extras || []).forEach((x) => out.push({ verb: 'extra', label: VERB_LABEL.extra, text: renderTemplate(x, tokens) }));
     return out;
 }

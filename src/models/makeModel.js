@@ -3,7 +3,8 @@ import { buildEncoders } from '@/models/encoders.js';
 
 /**
  * @param {object} spec
- *   meta: { id, name, fullName, port, docVersion, docDate, gainOffsetDb, hasMatrix, blurb }
+ *   meta: { id, name, fullName, port, productUrl, docVersion, docDate, gainOffsetDb, hasMatrix, blurb }
+ *     productUrl: link to the device's product page on shure.com (optional)
  *     docVersion: Shure command-strings reference / firmware version the list reflects (or null)
  *     docDate:    human-readable publish date of that reference, e.g. 'April 2024' (or null)
  *   elements: []        selectable nodes (inputs/processing/outputs)
@@ -23,6 +24,18 @@ const DEVICE_NODE = {
     matrixRole: null,
 };
 
+// Universal unsolicited error reply. Every device returns this for an unrecognized or
+// malformed command, so it's added to every model's device commands (REP only).
+const ERROR_RESPONSE = {
+    id: 'rep_err',
+    name: 'Error Response',
+    group: 'Device',
+    cat: 'details',
+    templates: { rep: ['< REP ERR >'] },
+    param: { kind: 'none' },
+    notes: 'Unsolicited reply to an unrecognized or malformed command.',
+};
+
 export function makeModel(spec) {
     const baseElements = spec.elements || [];
     // Every model gets a synthetic Device node for global commands.
@@ -31,7 +44,7 @@ export function makeModel(spec) {
         : [...baseElements, DEVICE_NODE];
     const channelCommands = spec.channelCommands || [];
     const crosspointCommands = spec.crosspointCommands || [];
-    const deviceCommands = spec.deviceCommands || [];
+    const deviceCommands = [...(spec.deviceCommands || []), ERROR_RESPONSE];
     const encoders = buildEncoders({ gainOffsetDb: spec.meta.gainOffsetDb });
 
     return {

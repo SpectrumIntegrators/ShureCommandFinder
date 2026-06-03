@@ -1,8 +1,29 @@
 # Shure DSP Command Finder
 
-A quick reference for looking up Shure DSP control command strings (GET/SET/REP) for third-party control systems such as Crestron and Extron, across Shure conferencing and networking devices (P300, ANIUSB-MATRIX, ANI22, ANI4IN, ANI4OUT, MXA910, MXA920).
+A quick reference for looking up Shure control command strings (GET/SET/REP) for third-party control systems such as Crestron and Extron.
 
 Reference tool only — not affiliated with, endorsed by, or sponsored by Shure Incorporated.
+
+## Supported devices
+
+- **Array Microphones**
+  - MXA310 Table Array
+  - MXA320 Table Array
+  - MXA710 Linear Array
+  - MXA901 Ceiling Array (Single Zone)
+  - MXA902 Ceiling Array + Loudspeaker
+  - MXA910 Ceiling Array
+  - MXA920 Ceiling Array
+- **DSPs & Interfaces**
+  - ANI22 (Audio Network Interface 2×2)
+  - ANI4IN (4-Channel Analog-to-Dante)
+  - ANI4OUT (4-Channel Dante-to-Analog)
+  - ANIUSB-MATRIX
+  - IntelliMix P300
+- **Accessories**
+  - MXA-MUTE Network Mute Button
+
+Command data is transcribed from Shure's [command-strings reference PDFs](https://www.shure.com/en-US/docs/commandstrings); more devices (including wireless systems and chargers) are being added.
 
 ## License
 

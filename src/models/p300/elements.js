@@ -50,7 +50,7 @@ export const elements = [
     // ---- Inputs: Analog 1-2 (line/aux level switch) ----
     {
         id: 'analog-in-1',
-        name: 'Analog Input 1 (From Codec)',
+        name: 'Analog Input 1',
         short: 'Analog In 1',
         group: 'Analog Inputs',
         kind: KIND.INPUT,
@@ -164,7 +164,7 @@ export const elements = [
     })),
     {
         id: 'analog-out-1',
-        name: 'Analog Output 1 (To Codec)',
+        name: 'Analog Output 1',
         short: 'Analog Out 1',
         group: 'Analog Outputs',
         kind: KIND.OUTPUT,
@@ -176,7 +176,7 @@ export const elements = [
     },
     {
         id: 'analog-out-2',
-        name: 'Analog Output 2 (To Speaker)',
+        name: 'Analog Output 2',
         short: 'Analog Out 2',
         group: 'Analog Outputs',
         kind: KIND.OUTPUT,

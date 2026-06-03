@@ -41,6 +41,9 @@ const channelCommands = [
     cmd('audio_out_clip', range(1, 10)),
     cmd('encryption_ch', range(1, 10)),
     cmd('get_all', range(1, 10)),
+
+    // ---- Beyond Basic (tab category set centrally in CATEGORY) ----
+    cmd('peq', isOut),
 ];
 
 const crosspointCommands = [
@@ -52,10 +55,11 @@ const deviceCommands = [
     dcmd('model'), dcmd('serial'), dcmd('fw_ver'), dcmd('device_id'),
     dcmd('preset'), dcmd('preset_audio_route'),
     dcmd('device_audio_mute'), dcmd('logic_mute'),
-    dcmd('flash'), dcmd('led_brightness'), dcmd('reboot'),
+    dcmd('flash'), dcmd('led_brightness_basic'), dcmd('reboot'),
     dcmd('usb_connect'), dcmd('ip_addr'),
     dcmd('input_meter_mode'), dcmd('output_meter_mode'), dcmd('meter_rate'),
     dcmd('onhook_enable'), dcmd('onhook_state'),
+    dcmd('preset_names'),
 ];
 
 export default makeModel({
@@ -64,6 +68,7 @@ export default makeModel({
         name: 'ANIUSB-MATRIX',
         fullName: 'ANIUSB-MATRIX',
         port: 2202,
+        productUrl: 'https://www.shure.com/en-US/products/mixers/aniusb-matrix',
         docVersion: '4.7',
         docDate: 'May 2024',
         gainOffsetDb: 110,

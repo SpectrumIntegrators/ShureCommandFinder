@@ -19,7 +19,10 @@
                 :value="api"
                 @input="onApi" />
         </label>
-        <span class="vf-range">({{ encoder.format(encoder.min) }} &hellip; {{ encoder.format(encoder.max) }})</span>
+        <span class="vf-range">
+            ({{ encoder.format(encoder.min) }} &hellip; {{ encoder.format(encoder.max) }}
+            &middot; API {{ apiMin }}&ndash;{{ apiMax }})
+        </span>
     </span>
 </template>
 
@@ -46,6 +49,14 @@ export default {
     computed: {
         api() {
             return encode(this.encoder, this.real);
+        },
+        // The API range is the encoder's real min/max run through the same encoding the
+        // device expects — i.e. the zero-padded ASCII tokens at each end of the range.
+        apiMin() {
+            return encode(this.encoder, this.encoder.min);
+        },
+        apiMax() {
+            return encode(this.encoder, this.encoder.max);
         },
     },
     mounted() {

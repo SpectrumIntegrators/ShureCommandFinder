@@ -117,6 +117,12 @@ export default {
     }
 }
 
+/* Raw free-text fields can hold multi-token values (e.g. coverage-area coordinates), so
+   give them more room than the numeric/slot inputs. */
+.select-ctl input[type='text'] {
+    width: 170px;
+}
+
 .slot-hint {
     font-weight: 400;
     font-size: 0.74rem;

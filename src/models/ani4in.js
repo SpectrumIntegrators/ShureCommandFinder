@@ -28,15 +28,23 @@ const channelCommands = [
     cmd('audio_in_rms', range(1, 4), { fw: '2.0' }),
     cmd('limiter_engaged', range(1, 4), { fw: '2.0' }),
     cmd('get_all', range(1, 4)),
+
+    // ---- Beyond Basic (tab category set centrally in CATEGORY) ----
+    cmd('peq', range(1, 4), { fw: '2.0' }),
+    cmd('audio_out_clip', range(1, 4)),
 ];
 
 const deviceCommands = [
     dcmd('model'), dcmd('serial'), dcmd('fw_ver'), dcmd('device_id'), dcmd('na_device_name'),
     dcmd('preset'),
     { ...deviceEnumCmd('audio_summing_mode', 'Audio Summing Mode', 'Routing', 'AUDIO_SUMMING_MODE', ['OFF', '1+2', '3+4', '1+2/3+4', '1+2+3+4'], 'Summing'), fw: '2.0' },
-    dcmd('flash'), dcmd('led_brightness'), dcmd('reboot', { fw: '2.0' }), dcmd('default_settings', { fw: '2.0' }),
+    dcmd('flash'), dcmd('led_brightness_basic'), dcmd('reboot', { fw: '2.0' }), dcmd('default_settings', { fw: '2.0' }),
     dcmd('encryption', { fw: '2.0' }), dcmd('control_mac'), dcmd('ip_addr'),
     dcmd('input_meter_mode', { fw: '2.0' }), dcmd('meter_rate'),
+    // ---- All: LED config / preset names ----
+    dcmd('led_color_sig_clip'),
+    dcmd('led_state_sig_clip'),
+    dcmd('preset_names'),
 ];
 
 export default makeModel({
@@ -45,6 +53,7 @@ export default makeModel({
         name: 'ANI4IN',
         fullName: 'ANI4IN (4-Channel Analog-to-Dante)',
         port: 2202,
+        productUrl: 'https://www.shure.com/en-US/products/mixers/ani4in',
         docVersion: '2.2',
         docDate: 'June 2024',
         gainOffsetDb: 110,

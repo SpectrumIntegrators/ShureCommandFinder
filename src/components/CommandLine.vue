@@ -108,14 +108,23 @@ export default {
 
 .cmd-text {
     flex: 1 1 auto;
+    min-width: 0;
     font-family: ui-monospace, 'Cascadia Code', Consolas, monospace;
     font-size: 0.85rem;
     background: c.$code-bg;
     color: c.$code-text;
     border-radius: 4px;
     padding: 3px 8px;
-    white-space: pre-wrap;
-    word-break: break-word;
+    // Keep responses on one line so columns stay aligned (for counting/extracting fields).
+    // Overflow scrolls horizontally (selecting with the mouse drags it) but no scrollbar shows.
+    white-space: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none; // Firefox
+    -ms-overflow-style: none; // legacy Edge
+
+    &::-webkit-scrollbar {
+        display: none; // WebKit / Blink
+    }
 
     // Placeholders (values you substitute): italic, hugged by a thin, tight border.
     .ph {

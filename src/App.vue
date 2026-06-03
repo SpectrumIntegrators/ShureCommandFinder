@@ -14,13 +14,29 @@
             <label class="model-picker">
                 <span class="mp-label">Model</span>
                 <select v-model="currentModelId">
-                    <option v-for="m in models" :key="m.meta.id" :value="m.meta.id">
-                        {{ m.meta.fullName || m.meta.name }}
-                    </option>
+                    <optgroup v-for="g in modelGroups" :key="g.label" :label="g.label">
+                        <option v-for="m in g.models" :key="m.meta.id" :value="m.meta.id">
+                            {{ m.meta.fullName || m.meta.name }}
+                        </option>
+                    </optgroup>
                 </select>
             </label>
+            <a
+                v-if="model.meta.productUrl"
+                class="product-link"
+                :href="model.meta.productUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                :title="`Open the ${model.meta.name} product page on shure.com`">
+                <span class="material-icons">open_in_new</span>
+            </a>
 
-            <span class="app-sub" :title="cmdRefTitle">{{ cmdRefLabel }} &middot; TCP {{ model.meta.port }}</span>
+            <span class="app-sub" :title="cmdRefTitle"><a
+                class="docs-link"
+                :href="docsUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Shure command-strings reference PDFs (source for this tool's data)">{{ cmdRefLabel }}</a> &middot; TCP {{ model.meta.port }}</span>
         </nav>
         <main>
             <HomeView :model="model" />
@@ -33,6 +49,13 @@
                 rel="noopener noreferrer"
                 title="View the MIT License">Copyright &copy; 2026 Spectrum Integrators</a>. Reference tool only &mdash;
             not affiliated with, endorsed by, or sponsored by Shure Incorporated.
+            &middot;
+            <a
+                class="license-link"
+                :href="repoUrl"
+                target="_blank"
+                rel="noopener noreferrer"
+                title="Open the GitHub repository">Report issues on GitHub</a>
         </footer>
     </div>
 </template>
@@ -40,8 +63,8 @@
 <script>
 import HomeView from '@/views/HomeView.vue';
 import logoUrl from '@/assets/logo.svg';
-import { ORG_URL, LICENSE_URL } from '@/config.js';
-import { MODELS, getModel, DEFAULT_MODEL_ID } from '@/models/index.js';
+import { ORG_URL, LICENSE_URL, REPO_URL, COMMAND_STRINGS_URL } from '@/config.js';
+import { MODEL_GROUPS, getModel, DEFAULT_MODEL_ID } from '@/models/index.js';
 
 const LS_MODEL = 'p300finder.model';
 
@@ -59,7 +82,9 @@ export default {
             logoUrl,
             orgUrl: ORG_URL,
             licenseUrl: LICENSE_URL,
-            models: MODELS,
+            repoUrl: REPO_URL,
+            docsUrl: COMMAND_STRINGS_URL,
+            modelGroups: MODEL_GROUPS,
             currentModelId: getModel(saved).meta.id || DEFAULT_MODEL_ID,
         };
     },
@@ -162,6 +187,21 @@ nav {
         }
     }
 
+    .product-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: rgba(255, 255, 255, 0.7);
+        text-decoration: none;
+        border-radius: 6px;
+        padding: 3px;
+        margin-left: -0.6rem;
+
+        .material-icons { font-size: 20px; }
+
+        &:hover { color: #fff; }
+    }
+
     .app-sub {
         color: rgba(255, 255, 255, 0.6);
         font-size: 0.78rem;
@@ -169,6 +209,16 @@ nav {
         overflow: hidden;
         text-overflow: ellipsis;
         margin-left: auto;
+
+        .docs-link {
+            color: inherit;
+            text-decoration: none;
+
+            &:hover {
+                color: #fff;
+                text-decoration: underline;
+            }
+        }
     }
 }
 
