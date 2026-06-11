@@ -2,7 +2,7 @@
     "name": "shure-p300-command-finder",
     "version": "0.1.0",
     "private": true,
-    "license": "GPL-3.0-or-later",
+    "license": "AGPL-3.0-or-later",
     "type": "module",
     "scripts": {
         "dev": "vite",

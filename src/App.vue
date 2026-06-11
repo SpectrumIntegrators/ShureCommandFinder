@@ -47,7 +47,7 @@
                 :href="licenseUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="View the GNU GPLv3 License">Copyright &copy; 2026 Spectrum Integrators</a>. Reference tool only &mdash;
+                title="View the GNU AGPLv3 License">Copyright &copy; 2026 Spectrum Integrators</a>. Reference tool only &mdash;
             not affiliated with, endorsed by, or sponsored by Shure Incorporated.
             &middot;
             <a
