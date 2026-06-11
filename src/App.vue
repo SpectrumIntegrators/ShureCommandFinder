@@ -55,7 +55,7 @@
                 :href="repoUrl"
                 target="_blank"
                 rel="noopener noreferrer"
-                title="Open the GitHub repository">Report issues on GitHub</a>
+                title="View the source on GitHub and report issues">View on GitHub and report issues</a>
         </footer>
     </div>
 </template>
